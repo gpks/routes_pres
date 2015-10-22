@@ -76,6 +76,9 @@ get '/patients/:id', to: 'patients#show'
 					<pre><code class="hljs" data-trim contenteditable>
 resources :photos
 					</code></pre>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :photos, controller: 'images'
+					</code></pre>
 				</section>
 
 				<section>
@@ -166,18 +169,179 @@ end
 				</section>
 
 				<section>
-					<h2>Nested Resources</h2>
+					<h2>Nested Resources - Shallow</h2>
 					<p>
-						Allows to capture relationships define in models in routing.
+						 Generates shallow routes for nested resource(s).
+					</p>
+					<p>
+						This allows URLs for resources that otherwise would be deeply nested such as a comment on a blog post like /posts/a-long-permalink/comments/1234 to be shortened to just /comments/1234.
 					</p>
 					<br>
 					<pre><code class="hljs" data-trim contenteditable>
-resources :magazines do
-  resources :ads
+resources :posts, shallow: true do
+  resources :comments
+end
+#Is the same as:
+
+resources :posts do
+  resources :comments, except: [:show, :edit, :update, :destroy]
+end
+resources :comments, only: [:show, :edit, :update, :destroy]
+
+					</code></pre>
+				</section>
+				<section>
+					<h2>Collection</h2>
+					<p>
+						 Allows to add additional paths to resources via GET.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :photos do
+  collection do
+    get 'search'
+  end
+end
+					</code></pre>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :photos do
+  get 'search', on: :collection
 end
 					</code></pre>
 				</section>
+				<section>
+					<h2>Member</h2>
+					<p>
+						 Allows to add additional path to single resource via GET.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :photos do
+  member do
+    get 'preview'
+  end
+end
+					</code></pre><pre><code class="hljs" data-trim contenteditable>
+resources :photos do
+  get 'search', on: :member
+end
+					</code></pre>
+				</section>
+				<section>
+					<h2>Resources additions</h2>
+					<p>
+						 Different hacks to resources
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :posts, path_names: { new: "brand_new" }
+# The above example will now change /posts/new to /posts/brand_new
 
+resources :posts, path: 'postings'
+# The resource and all segments will now route to /postings instead of /posts
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Defaults</h2>
+					<p>
+						 Allows you to set default parameters for a route.
+						 Using this, the :id parameter here will default to 'home'.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+defaults id: 'home' do
+  match 'scoped_pages/(:id)', to: 'pages#show'
+end
+					</code></pre>
+				</section>
+				<section>
+					<h2>Concerns</h2>
+					<p>
+						 Allows you to set default parameters for a route.
+						 Using this, the :id parameter here will default to 'home'.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+concern :commentable do
+  resources :comments
+end
+resources :messages, concerns: :commentable
+
+					</code></pre>
+					<pre><code class="hljs" data-trim contenteditable>
+resources :messages do
+  resources :comments
+end
+
+					</code></pre>
+				</section>
+				<section>
+					<h2>Dynamic segments</h2>
+					<p>
+						 It routes :controller and :action to right controlle and the rest is consider as part of params.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+get ':controller/:action/:id/:user_id'
+
+					</code></pre>
+				</section>
+				<section>
+					<h2>Match</h2>
+					<p>
+						 Allows to use the match method with the :via option to match multiple verbs at once.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+match 'photos', to: 'photos#show', via: [:get, :post]
+
+					</code></pre>
+				</section>
+				<section>
+					<h2>Constraints</h2>
+					<p>
+						:constraints option allows to enforce a format for a dynamic segment.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+get 'photos/:id', to: 'photos#show', constraints: { id: /[A-Z]\d{5}/ }
+					</code></pre>
+				</section>
+				<section>
+					<h2>Constraints with subdomain</h2>
+					<p>
+						Defines request-based constraint.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+get 'photos', to: 'photos#index', constraints: { subdomain: 'admin' }					</code></pre>
+				</section>
+				<section>
+					<h2>Wildcard segments</h2>
+					<p>
+						Wildcard segments can occur anywhere in a route. 
+
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+get 'books/*section/:title', to: 'books#show'
+</code></pre>
+				<br>
+				<p>
+				Code above would match <strong>books/some/section/last-words-a-memoir </strong>with params[:section] equals 'some/section', and params[:title] equals 'last-words-a-memoir'.
+					</p>
+				</section>
+				<section>
+					<h2>Redirections</h2>
+					<p>
+						Redirect one route to another.
+					</p>
+					<br>
+					<pre><code class="hljs" data-trim contenteditable>
+get '/stories', to: redirect('/articles')
+</code></pre>
+				</section>
 
 
 			</div>
